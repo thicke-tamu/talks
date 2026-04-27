@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Sample notes</title>
+    <link href="style_onepane.css" rel="stylesheet" />
+    <script>
+      window.EXCALIDRAW_ASSET_PATH =
+        "https://esm.sh/@excalidraw/excalidraw@0.18.0/dist/prod/";
+    </script>
+    <script type="module" crossorigin src="components/write-box/index.js"></script>
+    <link href="components/write-box/index.css" rel="stylesheet" />
+    <script type="module" src="components/fun-definition.js"></script>
+    <script type="module" src="components/fun-theorem.js"></script>
+    <script type="module" src="components/fun-example.js"></script>
+    <script type="module" src="components/fun-review.js"></script>
+    <script type="module" src="components/ordered-list.js"></script>
+    <script type="module" src="components/unordered-list.js"></script>
+    <script type="module" src="components/math-block.js"></script>
+    <script type="module" src="components/inline-math.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+    <script>
+        // MathJax setup.
+        MathJax = {
+            startup: {
+                typeset: false, // to stop MathJax from automatically formatting the page
+            },
+            loader: {load: ['[tex]/units']},
+            tex: {packages: {'[+]': ['units']}}
+        };
+    </script>
+    <script>
+        function checkPassword(password) {
+            const { ciphertext, hmac } = encryptedPage;
+            const newHmac = CryptoJS.HmacSHA256(ciphertext, password).toString();
+            if (newHmac == hmac) { // if password is correct
+                localStorage.setItem('password', password);
+                // Display "Loading..."
+                document.querySelector('#encryptionForm').style.display = 'none';
+                document.querySelector('#encryptionLoading').style.display = 'inline';
+                // Decrypt and update page.
+                // Use setTimeout so that the above CSS styles update first.
+                setTimeout(() => {
+                    plainText = CryptoJS.AES.decrypt(ciphertext, password).toString(CryptoJS.enc.Utf8);
+                    document.body.innerHTML = plainText;
+                }, 0);
+            }
+            else {
+                localStorage.removeItem('password');
+                document.querySelector('#password').classList.add('incorrect');
+            }
+            console.log('localStorage', localStorage.getItem('password'))
+        }
+
+        window.addEventListener('load', (e) => {
+            if (localStorage.getItem('password')) {
+                checkPassword(localStorage.getItem('password'));
+            }
+            document.querySelector('form').addEventListener('submit', (e) => {
+                e.preventDefault();
+                checkPassword(document.querySelector('#password').value);
+            });
+            document.querySelector('#password').addEventListener('input', (e) => {
+                document.querySelector('#password').classList.remove('incorrect');
+            });
+        });
+
+        const encryptedPage = JSON.parse(`{"ciphertext":"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","hmac":"e600b8eb8866a3335083066836643822877aec42b687ac581e067a6763ab1b2b"}`);
+    </script>
+    <style>
+        div#passwordContainer {
+            --password-font-size: 1.2rem;
+            margin: 0.5in auto;
+            padding: 0.3in 0in;
+            width: 25rem;
+            background-color: #DDDDDD;
+            border-radius: 0.2in;
+            font-family: sans-serif;
+            text-align: center;
+        }
+        div#passwordContainer p {
+            margin: 0;
+        }
+        div#passwordContainer label {
+            font-size: var(--password-font-size);
+        }
+        div#passwordContainer input {
+            font-size: var(--password-font-size);
+        }
+        div#passwordContainer input.incorrect {
+            border-color: red;
+        }
+        div#passwordContainer button {
+            font-size: var(--password-font-size);
+        }
+        #encryptionLoading {
+            font-size: var(--password-font-size);
+        }
+    </style>
+
+</head>
+<body>
+    <div id="passwordContainer">
+        <p style="font-size: 1.5rem; margin-bottom: 0.3in;">Enter password to open notes.</p>
+        <p>
+            <form id="encryptionForm">
+                <label for="password">Password:</label>
+                <input type="text" id="password" size="15" />
+                <button type="submit">Submit</button>
+            </form>
+            <span id="encryptionLoading" style="display: none;">Loading...</span>
+        </p>
+    </div>
+</body>
+</html>
