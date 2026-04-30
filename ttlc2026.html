@@ -108,7 +108,7 @@
         </unordered-list>
 </ordered-list><div style="height:50vh"></div><h2>Example</h2>
 <code-editor id='example-code'></code-editor><p><script>
-    const myCode = `### Existence and uniqueness of solutions
+    const myCode = String.raw(`### Existence and uniqueness of solutions
 
 Just because we can write down an initial value problem, doesn't necessarily mean that there is a solution.  And if there is a solution, it doesn't necessarily mean that there is only one solution.
 
@@ -153,7 +153,7 @@ From a practical point of view:  If your initial value problem does not have exa
         <li>$\ln(x) f'(x) + f(x) = \cot x, \qquad y(2) = 5$</li>
         <write-box height="3in"></write-box>
     </ordered-list>
-</fun-example>`;
+</fun-example>`);
     window.addEventListener('load', () => {
         document.querySelector('#example-code').dispatchEvent(new CustomEvent('replaceText', { detail: myCode }));
     });
