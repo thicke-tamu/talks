@@ -1,0 +1,1046 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#1d4ed8">
+  <meta name="color-scheme" content="light">
+  <meta name="description" content="Linear Phase Portrait Plotter — visualize spirals, centers, nodes, and saddle points for 2×2 linear systems. Click to add trajectories. WCAG 2.1 AA.">
+  <meta name="keywords" content="phase portrait, linear systems, differential equations, eigenvalues, saddle, spiral, center, node, direction field">
+  <title>Phase Portraits of Linear Systems — Differential Equations</title>
+  <script>
+    window.MathJax={
+      tex:{inlineMath:[['$','$'],['\\(','\\)']],displayMath:[['$$','$$'],['\\[','\\]']]},
+      options:{enableExplorer:true,enableAssistiveMml:true,
+        menuOptions:{settings:{assistiveMml:true,explorer:true,speech:true}},
+        skipHtmlTags:['script','noscript','style','textarea','pre','code']},
+      a11y:{speech:true,speechRules:'mathspeak',semantic:true},
+      startup:{pageReady:function(){return MathJax.startup.defaultPageReady();}}
+    };
+  </script>
+  <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js" async></script>
+  <style>
+/* ── Design tokens ── */
+:root{
+  --bg:#f0f2f5;--card:#fff;--sect:#f8f9fb;
+  --info:#eff6ff;--inf-b:#1d4ed8;--inf-hd:#1e3a8a;
+  --txt:#111827;--txt2:#374151;--muted:#4b5563;
+  --bdr:#6b7280;--bdr2:#d1d5db;--focus:#1d4ed8;
+  --blue:#1d4ed8;--bl2:#1e3a8a;--teal:#0f766e;
+  --vio:#6d28d9;--ora:#92400e;--green:#15803d;--red:#dc2626;--link:#1e40af;
+  --r:.5rem;--r2:.75rem;
+  --sh:0 1px 3px rgba(0,0,0,.10);--sh2:0 4px 12px rgba(0,0,0,.12);
+}
+.hc{
+  --bg:#fff;--card:#fff;--sect:#f0f0f0;--info:#e8eeff;--inf-b:#00c;--inf-hd:#00006b;
+  --txt:#000;--txt2:#000;--muted:#111;--bdr:#000;--bdr2:#333;--focus:#00f;
+  --blue:#00c;--bl2:#000099;--teal:#005500;--vio:#5500aa;--red:#cc0000;--link:#00c;
+}
+@media(prefers-contrast:more){:root{--txt:#000;--txt2:#000;--bdr:#000;--blue:#00c;--link:#00c;}}
+*,*::before,*::after{box-sizing:border-box;}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Arial,sans-serif;
+  background:var(--bg);color:var(--txt);margin:0;min-height:100vh;
+  display:flex;flex-direction:column;align-items:center;line-height:1.6;}
+*:focus-visible{outline:3px solid var(--focus);outline-offset:2px;border-radius:2px;
+  box-shadow:0 0 0 1px #fff,0 0 0 5px var(--focus);}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;
+  overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0;}
+.skip{position:absolute;top:-100%;left:50%;transform:translateX(-50%);
+  background:var(--blue);color:#fff;padding:.75rem 1.5rem;z-index:1000;
+  border-radius:0 0 var(--r) var(--r);font-weight:700;text-decoration:none;}
+.skip:focus{top:0;outline:3px solid #fff;outline-offset:2px;}
+
+/* ── Nav ── */
+.nav{position:sticky;top:0;left:0;width:100%;z-index:100;background:var(--card);
+  border-bottom:2px solid var(--bdr);box-shadow:var(--sh);}
+.nav-in{max-width:72rem;margin:0 auto;padding:.45rem 1rem;}
+.nav-list{list-style:none;display:flex;justify-content:center;gap:.75rem;margin:0;padding:0;flex-wrap:wrap;}
+.nav-list a{color:var(--link);text-decoration:none;font-weight:700;font-size:1rem;
+  padding:.625rem .5rem;border-radius:.3rem;display:inline-flex;align-items:center;min-height:44px;}
+.nav-list a:hover,.nav-list a:focus-visible{text-decoration:underline;}
+
+/* ── Card ── */
+.card{background:var(--card);padding:1.1rem 1.25rem;border-radius:var(--r2);
+  max-width:1100px;width:100%;margin:1rem auto 1.5rem;}
+h1{font-size:1.75rem;font-weight:800;text-align:center;margin:0 0 .25rem;letter-spacing:-.02em;}
+.subtitle{font-size:.9375rem;color:var(--txt2);text-align:center;margin-bottom:1.25rem;}
+
+/* ── Info panel ── */
+.info-panel{background:var(--info);border:2px solid var(--inf-b);border-radius:var(--r);
+  margin-bottom:1.25rem;overflow:hidden;}
+.info-btn{width:100%;padding:.875rem 1rem;display:flex;align-items:center;
+  justify-content:space-between;background:transparent;border:none;cursor:pointer;
+  font-size:1rem;font-weight:700;color:var(--inf-hd);text-align:left;}
+.info-btn:hover{background:rgba(0,0,0,.03);}
+.info-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+.info-body{padding:0 1.1rem 1rem;}
+.info-body p,.info-body li{font-size:.9375rem;color:var(--txt2);line-height:1.65;}
+.info-body ul{margin:0 0 .5rem 1.5rem;}.info-body li{margin-bottom:.3rem;}
+.info-body h2{font-size:1rem;font-weight:700;color:var(--txt);margin:.9rem 0 .3rem;}
+.defn-box{text-align:center;background:rgba(29,78,216,.06);padding:.6rem .5rem;
+  border-radius:var(--r);margin:.5rem 0;border-left:3px solid var(--blue);}
+.class-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:.4rem;margin:.5rem 0;}
+.ccell{border-radius:var(--r);padding:.45rem .7rem;font-size:.875rem;line-height:1.5;}
+
+/* ── Controls ── */
+.cbar{display:flex;flex-wrap:wrap;align-items:flex-end;gap:.5rem;margin-bottom:.6rem;
+  background:var(--sect);border:2px solid var(--bdr2);border-radius:var(--r);padding:.5rem .7rem;}
+.cfield{display:flex;flex-direction:column;gap:.18rem;}
+.cfield label,.cfield .clbl{font-size:.8125rem;font-weight:700;color:var(--txt2);white-space:nowrap;}
+.cfield input[type=number],.cfield input[type=text],.cfield select{
+  width:100%;min-height:36px;padding:.2rem .35rem;font-size:.9375rem;font-weight:600;
+  border:2px solid var(--bdr);border-radius:.375rem;background:var(--card);color:var(--txt);text-align:center;}
+.cfield input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:var(--blue);flex-shrink:0;}
+.cfield-xs{flex:0 1 68px;}
+.cfield-sm{flex:0 1 115px;}
+.cfield-med{flex:0 1 170px;}
+.cfield-chk{flex:0 1 auto;flex-direction:row;align-items:center;gap:.4rem;padding-bottom:.15rem;}
+.cfield-chk label{font-size:.875rem;font-weight:600;color:var(--txt2);cursor:pointer;}
+
+/* ── Matrix input ── */
+.matrix-wrap{display:flex;align-items:center;gap:.4rem;}
+.mat-bracket{font-size:2.3rem;line-height:1;color:var(--bdr);font-weight:200;user-select:none;}
+.mat-grid{display:grid;grid-template-columns:1fr 1fr;gap:.25rem;}
+.mat-grid input{width:64px;min-height:40px;text-align:center;border:2px solid var(--bdr);
+  border-radius:.375rem;font-size:1rem;font-weight:600;color:var(--txt);background:var(--card);}
+.mat-grid input:focus-visible{outline:3px solid var(--focus);outline-offset:2px;
+  box-shadow:0 0 0 1px #fff,0 0 0 5px var(--focus);}
+.mat-grid input::-webkit-inner-spin-button,
+.mat-grid input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.mat-grid input[type=number]{-moz-appearance:textfield;}
+
+/* ── Classification badge ── */
+.class-badge{display:inline-flex;flex-direction:column;align-items:center;justify-content:center;
+  padding:.45rem 1rem;border-radius:.5rem;text-align:center;line-height:1.35;min-width:180px;color:#fff;}
+.class-badge .ct{font-size:.9375rem;font-weight:800;}
+.class-badge .cs{font-size:.8125rem;font-weight:600;opacity:.9;}
+.class-badge .cd{font-size:.75rem;font-weight:500;opacity:.8;margin-top:.1rem;}
+
+/* ── Equation display ── */
+.eq-display{text-align:center;padding:.5rem .75rem;background:var(--info);
+  border:2px solid var(--inf-b);border-radius:var(--r);margin-bottom:.875rem;
+  min-height:2.5rem;font-size:1rem;}
+
+/* ── Action bar ── */
+.abar{display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;
+  margin-bottom:.875rem;padding:.5rem .75rem;background:var(--sect);
+  border:2px solid var(--bdr2);border-radius:var(--r);}
+.abtn{display:inline-flex;align-items:center;gap:.4rem;padding:.5rem 1.1rem;
+  min-height:44px;border:none;border-radius:.5rem;font-size:.9375rem;font-weight:700;cursor:pointer;}
+.abtn-go{background:var(--green);color:#fff;}.abtn-go:hover{background:#166534;}
+.abtn-clr{background:var(--red);color:#fff;}.abtn-clr:hover{background:#b91c1c;}
+.abtn-dl{background:var(--blue);color:#fff;}.abtn-dl:hover{background:var(--bl2);}
+.abtn-ts{background:var(--vio);color:#fff;}.abtn-ts:hover{background:#5b21b6;}
+.abtn:focus-visible{outline:3px solid #fff;outline-offset:2px;box-shadow:0 0 0 5px var(--focus);}
+
+/* ── Panel wrapper ── */
+.pwrap{border:2px solid var(--bdr2);border-radius:var(--r);overflow:hidden;
+  background:var(--card);margin-bottom:.875rem;}
+.phdr{padding:.35rem .75rem;display:flex;align-items:center;gap:.4rem;
+  background:var(--sect);border-bottom:1px solid var(--bdr2);
+  font-size:.8125rem;font-weight:700;color:var(--txt2);}
+.pdot{width:9px;height:9px;border-radius:50%;flex-shrink:0;}
+
+/* ── Canvas ── */
+.canvas-wrap{position:relative;display:flex;justify-content:center;
+  background:var(--card);padding:.75rem;}
+#phCanvas{display:block;cursor:crosshair;border-radius:.375rem;background:#f9fafb;
+  width:680px;height:680px;}
+.click-hint{position:absolute;top:1.15rem;left:50%;transform:translateX(-50%);
+  background:rgba(255,255,255,.95);border:2px solid var(--focus);border-radius:50px;
+  padding:.35rem 1.2rem;font-size:.8125rem;font-weight:700;color:var(--txt);
+  white-space:nowrap;pointer-events:none;z-index:10;box-shadow:var(--sh);}
+
+/* ── Time series ── */
+.time-controls{display:flex;flex-wrap:wrap;align-items:center;gap:.5rem;
+  padding:.45rem .75rem;background:var(--sect);border-bottom:1px solid var(--bdr2);}
+.tvar-btn{padding:.25rem .85rem;min-height:32px;border-radius:.375rem;
+  font-size:.875rem;font-weight:700;cursor:pointer;border:2px solid var(--red);
+  background:var(--red);color:#fff;transition:background .12s;}
+.tvar-btn.x-off{background:var(--card);color:var(--red);}
+.tvar-btn.y-on{border-color:var(--green);background:var(--green);color:#fff;}
+.tvar-btn.y-off{border-color:var(--green);background:var(--card);color:var(--green);}
+.tvar-btn:focus-visible{outline:3px solid var(--focus);outline-offset:2px;
+  box-shadow:0 0 0 1px #fff,0 0 0 5px var(--focus);}
+.tfield{display:flex;align-items:center;gap:.3rem;font-size:.8125rem;font-weight:600;color:var(--txt2);}
+.tfield input{width:58px;min-height:30px;padding:.1rem .3rem;border:2px solid var(--bdr2);
+  border-radius:.35rem;text-align:center;font-size:.8125rem;color:var(--txt);background:var(--card);}
+.tfield input:focus-visible{outline:3px solid var(--focus);outline-offset:2px;}
+#timeCanvas{display:block;border-radius:0;background:#f9fafb;width:100%;height:auto;}
+
+/* ── Footer ── */
+.footer{margin-top:1.25rem;border-top:2px solid var(--bdr2);padding-top:1rem;
+  text-align:center;color:var(--txt2);font-size:.875rem;}
+.footer a{color:var(--link);text-decoration:underline;}
+
+/* ── Contrast toggle ── */
+.ctoggle{position:fixed;bottom:1rem;right:1rem;z-index:200;background:var(--txt);
+  color:var(--card);border:2px solid var(--bdr);border-radius:50%;width:48px;height:48px;
+  font-size:1.25rem;cursor:pointer;display:flex;align-items:center;justify-content:center;
+  box-shadow:var(--sh2);}
+.ctoggle:focus-visible{outline:3px solid var(--focus);}
+
+@media(max-width:640px){
+  .card{padding:.875rem;margin:1rem .5rem 1.25rem;}
+  .mat-grid input{width:52px;}
+  .canvas-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;justify-content:flex-start;}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition:none!important;}}
+  
+/* ===== Back link ===== */
+.back-link{display:flex;width:fit-content;align-items:center;gap:6px;font-size:.85rem;font-weight:500;
+  color:#4338ca;text-decoration:none;margin:0.5rem auto;transition:transform .2s;}
+.back-link:hover{transform:translateX(-3px);color:#3730a3;}
+</style>
+    <meta name="author" content="Shelvean Kapita">
+    <link rel="canonical" href="https://shelvean.github.io/math-tools/linearportrait.html">
+    <!-- Open Graph -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Math Tools — Shelvean Kapita">
+    <meta property="og:title" content="Phase Portraits of Linear Systems — Differential Equations">
+    <meta property="og:description" content="Linear Phase Portrait Plotter — visualize spirals, centers, nodes, and saddle points for 2×2 linear systems. Click to add trajectories. WCAG 2.1 AA.">
+    <meta property="og:url" content="https://shelvean.github.io/math-tools/linearportrait.html">
+    <meta property="og:image" content="https://shelvean.github.io/math-tools/android-chrome-192x192.png">
+    <meta property="og:locale" content="en_US">
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary">
+    <meta name="twitter:title" content="Phase Portraits of Linear Systems — Differential Equations">
+    <meta name="twitter:description" content="Linear Phase Portrait Plotter — visualize spirals, centers, nodes, and saddle points for 2×2 linear systems. Click to add trajectories. WCAG 2.1 AA.">
+    <meta name="twitter:image" content="https://shelvean.github.io/math-tools/android-chrome-192x192.png">
+</head>
+<body>
+
+<main id="main" class="card" role="main">
+  <h1>Phase Portraits of Linear Systems</h1>
+  <p class="subtitle">Visualize direction fields and trajectories for \(\dot{\mathbf{x}}=A\mathbf{x}\). Click the canvas to integrate trajectories from any initial condition.</p>
+
+  <!-- About panel -->
+  <div class="info-panel">
+    <button id="infoBtn" class="info-btn" aria-expanded="false" aria-controls="infoBody" type="button"
+      aria-label="About phase portraits: expand or collapse">
+      <span>About &mdash; Linear Systems, Eigenvalues &amp; Phase Portrait Classification</span>
+      <span id="infoIcon" style="font-size:1.25rem;font-weight:700;flex-shrink:0;" aria-hidden="true">+</span>
+    </button>
+    <div id="infoBody" class="info-body" role="region" aria-labelledby="infoBtn" hidden>
+      <h2>The Linear System</h2>
+      <p>A <strong>planar linear autonomous system</strong> has the form \(\dot{\mathbf{x}}=A\mathbf{x}\), where \(A\) is a constant \(2\times2\) matrix and \(\mathbf{x}=(x,y)^T\). The origin is always an equilibrium. The qualitative behaviour of all solutions — whether they spiral in, radiate outward, oscillate, or approach along straight lines — is determined entirely by the <strong>eigenvalues</strong> of \(A\).</p>
+      <div class="defn-box">\[\dot{x}=ax+by,\qquad\dot{y}=cx+dy,\qquad A=\begin{pmatrix}a&amp;b\\c&amp;d\end{pmatrix}\]</div>
+      <h2>Classification by Eigenvalues</h2>
+      <p>Let \(\tau=\operatorname{tr}A=a+d\), \(\delta=\det A=ad-bc\), and \(\Delta=\tau^2-4\delta\).</p>
+      <div class="class-grid">
+        <div class="ccell" style="background:rgba(220,38,38,.07);border-left:3px solid #dc2626"><strong>Saddle:</strong> \(\delta&lt;0\). Two real eigenvalues of opposite sign. Stable and unstable manifolds form straight-line orbits.</div>
+        <div class="ccell" style="background:rgba(21,128,61,.07);border-left:3px solid #15803d"><strong>Stable Node:</strong> \(\delta&gt;0,\;\Delta\ge0,\;\tau&lt;0\). Two negative eigenvalues; all orbits approach the origin.</div>
+        <div class="ccell" style="background:rgba(185,28,28,.07);border-left:3px solid #b91c1c"><strong>Unstable Node:</strong> \(\delta&gt;0,\;\Delta\ge0,\;\tau&gt;0\). Two positive eigenvalues; all orbits leave the origin.</div>
+        <div class="ccell" style="background:rgba(29,78,216,.07);border-left:3px solid #1d4ed8"><strong>Center:</strong> \(\tau=0,\;\delta&gt;0\). Purely imaginary eigenvalues; closed elliptical orbits. Neutrally stable.</div>
+        <div class="ccell" style="background:rgba(15,118,110,.07);border-left:3px solid #0f766e"><strong>Stable Spiral:</strong> \(\Delta&lt;0,\;\tau&lt;0\). Complex eigenvalues with negative real part; orbits wind inward.</div>
+        <div class="ccell" style="background:rgba(146,64,14,.07);border-left:3px solid #92400e"><strong>Unstable Spiral:</strong> \(\Delta&lt;0,\;\tau&gt;0\). Complex eigenvalues with positive real part; orbits wind outward.</div>
+        <div class="ccell" style="background:rgba(109,40,217,.07);border-left:3px solid #6d28d9"><strong>Defective Node:</strong> Repeated eigenvalue, single eigenvector. Parabolic-like orbits near the origin.</div>
+        <div class="ccell" style="background:rgba(75,85,99,.07);border-left:3px solid #4b5563"><strong>Star Node:</strong> \(A=\lambda I\). Repeated eigenvalue, every direction is an eigenvector; straight-line orbits everywhere.</div>
+      </div>
+      <h2>Numerical Method</h2>
+      <p>Trajectories are computed by integrating \(\dot{\mathbf{x}}=A\mathbf{x}\) both forward and backward in time using a 4th-order <strong>Runge&ndash;Kutta (RK4)</strong> method with adaptive step size. Centers are handled by a refined fixed-step integrator to produce accurate closed orbits.</p>
+      <h2>How to Use</h2>
+      <ul>
+        <li>Enter the matrix entries \(a,b,c,d\) in the matrix cells. The direction field and classification update automatically after a short pause.</li>
+        <li>Select an <strong>example</strong> from the dropdown to load a preset matrix with strategic trajectories illustrating the classification.</li>
+        <li><strong>Click anywhere</strong> on the phase plane to integrate a trajectory through that initial condition (forward and backward). Trajectories are colour-coded.</li>
+        <li>Use <strong>Generate</strong> to redraw the field and clear trajectories; <strong>Clear trajectories</strong> removes curves while keeping the field.</li>
+        <li>Adjust arrow count, scale, opacity, and colour. Toggle grid and initial point markers using the checkboxes.</li>
+        <li>Open the <strong>Time Series</strong> panel to plot \(x(t)\) and/or \(y(t)\) for all current trajectories.</li>
+        <li>Download a PNG of the current portrait using <strong>Download PNG</strong>.</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Equation display -->
+  <div id="eq-display" class="eq-display" role="math" aria-label="Current system" aria-live="polite">
+    \(\dot{x}=ax+by,\quad\dot{y}=cx+dy\)
+  </div>
+
+  <!-- Controls -->
+  <div class="cbar" role="group" aria-label="Matrix, settings and examples">
+    <!-- Matrix A -->
+    <div class="cfield" style="flex:0 1 auto;">
+      <span class="clbl">Matrix \(A\)</span>
+      <div class="matrix-wrap" role="group" aria-label="2 by 2 matrix entries">
+        <span class="mat-bracket" aria-hidden="true">[</span>
+        <div class="mat-grid">
+          <input type="number" step="any" id="a" value="-1" aria-label="a: row 1, col 1">
+          <input type="number" step="any" id="b" value="2"  aria-label="b: row 1, col 2">
+          <input type="number" step="any" id="c" value="-2" aria-label="c: row 2, col 1">
+          <input type="number" step="any" id="d" value="-1" aria-label="d: row 2, col 2">
+        </div>
+        <span class="mat-bracket" aria-hidden="true">]</span>
+      </div>
+    </div>
+
+    <!-- Classification badge -->
+    <div class="cfield" style="flex:0 1 auto;">
+      <span class="clbl">Classification</span>
+      <div id="classBadge" class="class-badge" style="background:var(--vio);"
+        role="status" aria-live="polite" aria-label="Classification pending">
+        <span class="ct">—</span><span class="cs"></span><span class="cd"></span>
+      </div>
+    </div>
+
+    <!-- Arrows per axis -->
+    <div class="cfield cfield-xs">
+      <label for="arrowCount">Arrows</label>
+      <input type="number" id="arrowCount" value="25" min="10" max="40">
+    </div>
+
+    <!-- Scale -->
+    <div class="cfield cfield-xs">
+      <label for="arrowScale">Scale</label>
+      <input type="number" id="arrowScale" value="0.6" min="0.1" max="2" step="0.1">
+    </div>
+
+    <!-- Opacity -->
+    <div class="cfield cfield-xs">
+      <label for="arrowOpacity">Opacity</label>
+      <input type="number" id="arrowOpacity" value="0.45" min="0.05" max="1" step="0.05">
+    </div>
+
+    <!-- Trajectory arrowhead size -->
+    <div class="cfield cfield-xs">
+      <label for="trajHeadSize">Head size</label>
+      <input type="number" id="trajHeadSize" value="5.5" min="1" max="20" step="0.5">
+    </div>
+
+    <!-- Field colour -->
+    <div class="cfield cfield-sm">
+      <label for="fieldColor">Field colour</label>
+      <select id="fieldColor">
+        <option value="#000000">Black</option>
+        <option value="#2563eb">Blue</option>
+        <option value="#dc2626">Red</option>
+        <option value="#16a34a">Green</option>
+        <option value="#7c3aed">Purple</option>
+        <option value="#ea580c">Orange</option>
+      </select>
+    </div>
+
+    <!-- Eigenvector line colour -->
+    <div class="cfield cfield-sm">
+      <label for="eigenColor">Eigenvec colour</label>
+      <select id="eigenColor">
+        <option value="#2563eb">Blue</option>
+        <option value="#dc2626">Red</option>
+        <option value="#000000" selected>Black</option>
+      </select>
+    </div>
+
+    <!-- Checkboxes -->
+    <div class="cfield cfield-chk">
+      <input type="checkbox" id="showField" checked>
+      <label for="showField">Field</label>
+    </div>
+    <div class="cfield cfield-chk">
+      <input type="checkbox" id="showGrid" checked>
+      <label for="showGrid">Grid</label>
+    </div>
+    <div class="cfield cfield-chk">
+      <input type="checkbox" id="showInitialPoint" checked>
+      <label for="showInitialPoint">Init point</label>
+    </div>
+    <div class="cfield cfield-chk">
+      <input type="checkbox" id="showEigen" checked>
+      <label for="showEigen">Eigenvectors</label>
+    </div>
+
+    <!-- Examples dropdown -->
+    <div class="cfield cfield-med">
+      <label for="exampleSel">Load example</label>
+      <select id="exampleSel">
+        <option value="">— Select example —</option>
+        <optgroup label="Nodes">
+          <option value="-2,0,0,-3">Stable Node</option>
+          <option value="2,0,0,3">Unstable Node</option>
+          <option value="-1,0,0,-1">Star Node (stable)</option>
+          <option value="1,1,0,1">Defective Node (unstable)</option>
+        </optgroup>
+        <optgroup label="Saddle">
+          <option value="1,3,3,-1">Saddle Point</option>
+          <option value="3,1,-1,-3">Saddle (2)</option>
+        </optgroup>
+        <optgroup label="Spirals &amp; Centers">
+          <option value="-1,2,-2,-1">Stable Spiral</option>
+          <option value="1,2,-2,1">Unstable Spiral</option>
+          <option value="0,1,-1,0">Center</option>
+          <option value="-1,2,-2,1">Center (2)</option>
+        </optgroup>
+        <optgroup label="Bifurcation (animated)">
+          <option value="bifurc">A(μ): μ ∈ [−2, 2]</option>
+        </optgroup>
+      </select>
+    </div>
+  </div>
+
+  <!-- Action bar -->
+  <div class="abar" role="group" aria-label="Actions">
+    <button class="abtn abtn-go"  id="btnGenerate" type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><polygon points="5,3 19,12 5,21"/></svg> Generate</button>
+    <button class="abtn abtn-clr" id="btnClear"    type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" aria-hidden="true"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg> Clear trajectories</button>
+    <button class="abtn abtn-dl"  id="btnDL"       type="button"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg> Download PNG</button>
+    <button class="abtn abtn-ts"  id="btnTime"     type="button" aria-expanded="false" aria-controls="timePanel"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg> Time series</button>
+  </div>
+
+  <!-- Phase portrait canvas panel -->
+  <div class="pwrap">
+    <div class="phdr">
+      <span class="pdot" style="background:var(--blue);" aria-hidden="true"></span>
+      Phase Plane &mdash; click the canvas to draw a trajectory
+    </div>
+    <div class="canvas-wrap">
+      <div id="clickHint" class="click-hint" role="status">Click anywhere on the plane to add a trajectory</div>
+      <canvas id="phCanvas" width="680" height="680"
+        role="img" tabindex="0"
+        aria-label="Phase portrait canvas. Click to add trajectories."></canvas>
+    </div>
+  </div>
+
+  <!-- Time series panel -->
+  <div id="timePanel" class="pwrap" style="display:none;">
+    <div class="phdr">
+      <span class="pdot" style="background:var(--vio);" aria-hidden="true"></span>
+      Time Series &mdash; \(x(t)\) and \(y(t)\)
+    </div>
+    <div class="time-controls" role="group" aria-label="Time series controls">
+      <button id="btnX"  class="tvar-btn"      type="button" aria-pressed="true">x(t)</button>
+      <button id="btnY"  class="tvar-btn y-off" type="button" aria-pressed="false">y(t)</button>
+      <div class="tfield"><label for="tPlotMin">t min</label><input type="text" id="tPlotMin" value="0"></div>
+      <div class="tfield"><label for="tPlotMax">t max</label><input type="text" id="tPlotMax" value="30"></div>
+      <div class="tfield"><label for="vPlotMin">val min</label><input type="text" id="vPlotMin" value="-3"></div>
+      <div class="tfield"><label for="vPlotMax">val max</label><input type="text" id="vPlotMax" value="3"></div>
+      <button id="btnAutoFit" class="abtn abtn-go" type="button"
+        style="min-height:32px;padding:.25rem .85rem;font-size:.8125rem;">Auto</button>
+    </div>
+    <div style="padding:.5rem .75rem .75rem;">
+      <canvas id="timeCanvas" width="1040" height="300"
+        role="img" aria-label="Time series plot"
+        style="display:block;width:100%;height:auto;border-radius:.375rem;background:#f9fafb;border:1px solid var(--bdr2);"></canvas>
+    </div>
+  </div>
+
+  <footer class="footer" role="contentinfo">
+    &copy; Shelvean Kapita &mdash; Department of Mathematics, Texas A&amp;M University.
+    <a href="https://github.com/shelvean/math-tools/blob/main/LICENSE">MIT License</a>. <a href="https://github.com/shelvean/math-tools">Source</a>
+  </footer>
+</main>
+
+<button class="ctoggle" id="ctog" type="button" aria-label="Toggle high-contrast mode">
+  <span aria-hidden="true">&#9681;</span>
+</button>
+
+<script>
+/* ── Utilities ── */
+function say(m){var e=document.getElementById('live');e.textContent='';setTimeout(function(){e.textContent=m;},50);}
+function debounce(fn,d){var t;return function(){clearTimeout(t);t=setTimeout(function(){fn();},d);};}
+function throttle(fn,lim){var ok=true;return function(){if(!ok)return;fn();ok=false;setTimeout(function(){ok=true;},lim);};}
+function isHC(){return document.documentElement.classList.contains('hc');}
+
+/* ── State ── */
+var userPoints=[],trajectories=[];
+var animRunning=false,animTimer=null;
+var timeVarX=true,timeVarY=false;
+
+/* ── Canvas dimensions (intrinsic, always square) ── */
+var CW=680,CH=680,PAD=60;
+var SX_MIN=-5,SX_MAX=5,SY_MIN=-5,SY_MAX=5;
+
+/* ── Coordinate helpers ── */
+function xScale(){return(CW-2*PAD)/(SX_MAX-SX_MIN);}
+function yScale(){return(CH-2*PAD)/(SY_MAX-SY_MIN);}
+function xOff(){return(CW-(SX_MAX-SX_MIN)*xScale())/2;}
+function s2cx(sx){return xOff()+(sx-SX_MIN)*xScale();}
+function s2cy(sy){return CH-xOff()-(sy-SY_MIN)*yScale();}
+function c2sx(cx){return SX_MIN+(cx-xOff())/xScale();}
+function c2sy(cy){return SY_MIN+(CH-xOff()-cy)/yScale();}
+function inBounds(x,y){return x>=SX_MIN&&x<=SX_MAX&&y>=SY_MIN&&y<=SY_MAX;}
+function inCanvas(cx,cy){return cx>=PAD&&cx<=CW-PAD&&cy>=PAD&&cy<=CH-PAD;}
+
+/* ── Matrix read ── */
+function getM(){
+  function rv(id){var el=document.getElementById(id);var c=el.getAttribute('data-computed');return c!==null?parseFloat(c):(parseFloat(el.value)||0);}
+  return{a:rv('a'),b:rv('b'),c:rv('c'),d:rv('d')};
+}
+function setComputed(a,b,c,d){
+  ['a','b','c','d'].forEach(function(id,i){document.getElementById(id).setAttribute('data-computed',[a,b,c,d][i]);});
+}
+function clearComputed(){['a','b','c','d'].forEach(function(id){document.getElementById(id).removeAttribute('data-computed');});}
+
+/* ── Classification ── */
+function classifyEquilibrium(a,b,c,d){
+  var tr=a+d,det=a*d-b*c,disc=tr*tr-4*det;
+  /* Zero matrix — every point is an equilibrium */
+  if(a===0&&b===0&&c===0&&d===0)return{type:'Plane of Equilibria',stability:'Neutrally Stable',description:'A = 0; every point is an equilibrium'};
+  /* Singular matrix — at least one zero eigenvalue */
+  if(Math.abs(det)<1e-10){
+    if(tr<-1e-10)return{type:'Non-isolated Equilibria',stability:'Stable',description:'\u03bb\u2081 = 0, \u03bb\u2082 < 0; line of equilibria'};
+    if(tr>1e-10)return{type:'Non-isolated Equilibria',stability:'Unstable',description:'\u03bb\u2081 = 0, \u03bb\u2082 > 0; line of equilibria'};
+    return{type:'Non-isolated Equilibria',stability:'Neutrally Stable',description:'\u03bb\u2081 = \u03bb\u2082 = 0; line or plane of equilibria'};
+  }
+  /* Two distinct real eigenvalues */
+  if(disc>1e-10){
+    var l1=(tr+Math.sqrt(disc))/2,l2=(tr-Math.sqrt(disc))/2;
+    if(l1*l2<0)return{type:'Saddle Point',stability:'Unstable',description:'Real eigenvalues of opposite sign'};
+    if(l1<0&&l2<0)return{type:'Stable Node',stability:'Asymptotically Stable',description:'\u03bb\u2081, \u03bb\u2082 < 0 real and distinct'};
+    return{type:'Unstable Node',stability:'Unstable',description:'\u03bb\u2081, \u03bb\u2082 > 0 real and distinct'};
+  }
+  /* Complex conjugate eigenvalues */
+  if(disc<-1e-10){
+    var re=tr/2;
+    if(Math.abs(re)<1e-10)return{type:'Center',stability:'Stable (Lyapunov)',description:'Purely imaginary eigenvalues \u03b1 = 0'};
+    if(re<0)return{type:'Spiral Sink',stability:'Asymptotically Stable',description:'Complex eigenvalues with Re(\u03bb) < 0'};
+    return{type:'Spiral Source',stability:'Unstable',description:'Complex eigenvalues with Re(\u03bb) > 0'};
+  }
+  /* Repeated real eigenvalue (disc ≈ 0), λ = tr/2 */
+  var lam=tr/2;
+  var isScalar=(Math.abs(b)<1e-10&&Math.abs(c)<1e-10&&Math.abs(a-d)<1e-10);
+  if(isScalar){
+    if(lam<-1e-10)return{type:'Star Node (Proper)',stability:'Asymptotically Stable',description:'Repeated \u03bb < 0, A = \u03bbI; straight-line trajectories'};
+    if(lam>1e-10)return{type:'Star Node (Proper)',stability:'Unstable',description:'Repeated \u03bb > 0, A = \u03bbI; straight-line trajectories'};
+    return{type:'Non-isolated Equilibria',stability:'Neutrally Stable',description:'\u03bb = 0 repeated, A = 0'};
+  }
+  if(lam<-1e-10)return{type:'Improper Node (Defective)',stability:'Asymptotically Stable',description:'Repeated \u03bb < 0, one eigenvector; tangent trajectories'};
+  if(lam>1e-10)return{type:'Improper Node (Defective)',stability:'Unstable',description:'Repeated \u03bb > 0, one eigenvector; tangent trajectories'};
+  return{type:'Nilpotent',stability:'Unstable',description:'\u03bb = 0 repeated, not diagonalizable'};
+}
+
+function updateBadge(){
+  var M=getM(),cl=classifyEquilibrium(M.a,M.b,M.c,M.d);
+  var bg={'Asymptotically Stable':'#15803d','Stable':'#15803d','Stable (Lyapunov)':'#0f766e','Neutrally Stable':'#0f766e','Unstable':'#dc2626'}[cl.stability]||'#6d28d9';
+  var bd=document.getElementById('classBadge');
+  bd.style.background=bg;
+  bd.innerHTML='<span class="ct">'+cl.type+'</span><span class="cs">'+cl.stability+'</span><span class="cd">'+cl.description+'</span>';
+  bd.setAttribute('aria-label',cl.type+': '+cl.stability+'. '+cl.description);
+}
+
+/* ── Equation display ── */
+function updateEq(){
+  var M=getM(),a=M.a,b=M.b,c=M.c,d=M.d;
+  function fx(v,vx){if(v===0)return'';var s=Math.round(v*1000)/1000;if(v===1)return vx;if(v===-1)return'-'+vx;return s+vx;}
+  function fy(v,vy){if(v===0)return'';if(v===1)return'+'+vy;if(v===-1)return'-'+vy;var s=Math.round(v*1000)/1000;return(s>=0?'+'+s:s)+vy;}
+  var xpart=fx(a,'x')+(b===0?'':fy(b,'y'));
+  var ypart=fx(c,'x')+(d===0?'':fy(d,'y'));
+  if(!xpart)xpart='0';if(!ypart)ypart='0';
+  var eq='\\[\\begin{cases}\\dot{x}='+xpart+'\\\\\\dot{y}='+ypart+'\\end{cases}\\]';
+  var el=document.getElementById('eq-display');el.innerHTML=eq;
+  if(window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([el]).catch(function(){});
+  el.setAttribute('aria-label','x-dot = '+a+'x + '+b+'y; y-dot = '+c+'x + '+d+'y');
+}
+
+/* ── RK4 ── */
+function rk4(x,y,a,b,c,d,h){
+  var k1x=a*x+b*y,k1y=c*x+d*y;
+  var k2x=a*(x+h/2*k1x)+b*(y+h/2*k1y),k2y=c*(x+h/2*k1x)+d*(y+h/2*k1y);
+  var k3x=a*(x+h/2*k2x)+b*(y+h/2*k2y),k3y=c*(x+h/2*k2x)+d*(y+h/2*k2y);
+  var k4x=a*(x+h*k3x)+b*(y+h*k3y),k4y=c*(x+h*k3x)+d*(y+h*k3y);
+  return{x:x+h/6*(k1x+2*k2x+2*k3x+k4x),y:y+h/6*(k1y+2*k2y+2*k3y+k4y)};
+}
+
+/* ── Trajectory computation ── */
+function computeCenterTraj(x0,y0,a,b,c,d){
+  /* For centers, compute the period from eigenvalues and trace one full orbit */
+  var tr=a+d,det=a*d-b*c;
+  var omega=Math.sqrt(Math.max(det-tr*tr/4,0.01));
+  var period=2*Math.PI/omega;
+  var steps=800;
+  var h=period/steps;
+  var pts=[],x=x0,y=y0,t=0;
+  for(var i=0;i<=steps;i++){
+    if(!inBounds(x,y))break;
+    pts.push({cx:s2cx(x),cy:s2cy(y),sx:x,sy:y,t:t});
+    var n=rk4(x,y,a,b,c,d,h);x=n.x;y=n.y;t+=h;
+  }
+  return pts;
+}
+
+async function computeTraj(x0,y0){
+  var M=getM(),a=M.a,b=M.b,c=M.c,d=M.d;
+  var cl=classifyEquilibrium(a,b,c,d);
+  var isCenter=(cl.type==='Center');
+  var isSpiral=(cl.type.indexOf('Spiral')>=0);
+  if(isCenter)return computeCenterTraj(x0,y0,a,b,c,d);
+  var pts=[],MAX=1000,h,x,y,t;
+  if(inBounds(x0,y0))pts.push({cx:s2cx(x0),cy:s2cy(y0),sx:x0,sy:y0,t:0});
+  x=x0;y=y0;t=0;
+  for(var i=0;i<MAX;i++){
+    var dx=a*x+b*y,dy=c*x+d*y,spd=Math.sqrt(dx*dx+dy*dy);
+    h=isSpiral?0.015:(spd>0.1?Math.min(0.3/spd,0.1):0.05);
+    var n=rk4(x,y,a,b,c,d,h);x=n.x;y=n.y;t+=h;
+    if(Math.abs(x)>100||Math.abs(y)>100)break;
+    if(!inBounds(x,y))break;
+    var cx2=s2cx(x),cy2=s2cy(y);
+    if(inCanvas(cx2,cy2))pts.push({cx:cx2,cy:cy2,sx:x,sy:y,t:t});else break;
+    if(pts.length>1500)break;
+    if(pts.length>10&&spd<1e-4)break;
+  }
+  x=x0;y=y0;t=0;var bk=[];
+  for(var i=0;i<MAX;i++){
+    var dx=a*x+b*y,dy=c*x+d*y,spd=Math.sqrt(dx*dx+dy*dy);
+    h=isSpiral?0.015:(spd>0.1?Math.min(0.3/spd,0.1):0.05);
+    var n=rk4(x,y,a,b,c,d,-h);x=n.x;y=n.y;t-=h;
+    if(Math.abs(x)>100||Math.abs(y)>100)break;
+    if(!inBounds(x,y))break;
+    var cx2=s2cx(x),cy2=s2cy(y);
+    if(inCanvas(cx2,cy2))bk.unshift({cx:cx2,cy:cy2,sx:x,sy:y,t:t});else break;
+    if(bk.length>750)break;
+    if(bk.length>10&&spd<1e-4)break;
+  }
+  return bk.concat(pts);
+}
+
+/* ── Nice step ── */
+function niceStep(range){
+  var r=range/8,e=Math.pow(10,Math.floor(Math.log10(r))),f=r/e;
+  return(f<=1.5?1:f<=3.5?2:f<=7?5:10)*e;
+}
+
+/* ── hexToRGBA ── */
+function h2rgba(hex,alpha){
+  var r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);
+  return'rgba('+r+','+g+','+b+','+alpha+')';
+}
+
+/* ── Eigenvector computation ── */
+function eigvecFor(a,b,c,d,lam){
+  if(Math.abs(b)>1e-10)return{x:b,y:lam-a};
+  if(Math.abs(c)>1e-10)return{x:lam-d,y:c};
+  /* Diagonal matrix: axis-aligned eigenvectors */
+  if(Math.abs(lam-a)<1e-10)return{x:1,y:0};
+  if(Math.abs(lam-d)<1e-10)return{x:0,y:1};
+  return null;
+}
+function computeEigenvectors(a,b,c,d){
+  var tr=a+d,det=a*d-b*c,disc=tr*tr-4*det;
+  /* Complex eigenvalues — no real eigenvector lines */
+  if(disc<-1e-10)return[];
+  var out=[];
+  if(disc>1e-10){
+    var l1=(tr+Math.sqrt(disc))/2,l2=(tr-Math.sqrt(disc))/2;
+    var v1=eigvecFor(a,b,c,d,l1);if(v1)out.push({lambda:l1,v:v1});
+    var v2=eigvecFor(a,b,c,d,l2);if(v2)out.push({lambda:l2,v:v2});
+  } else {
+    var lam=tr/2;
+    var isScalar=(Math.abs(b)<1e-10&&Math.abs(c)<1e-10&&Math.abs(a-d)<1e-10);
+    if(isScalar){
+      out.push({lambda:lam,v:{x:1,y:0}});
+      out.push({lambda:lam,v:{x:0,y:1}});
+    } else {
+      var v=eigvecFor(a,b,c,d,lam);if(v)out.push({lambda:lam,v:v});
+    }
+  }
+  return out;
+}
+
+/* ── Draw eigenvector lines (straight lines through origin) ── */
+function drawEigenLines(ctx,color){
+  var M=getM(),evs=computeEigenvectors(M.a,M.b,M.c,M.d);
+  if(!evs.length)return;
+  ctx.save();
+  ctx.strokeStyle=color;ctx.lineWidth=2.2;ctx.setLineDash([]);ctx.globalAlpha=0.9;
+  evs.forEach(function(ev){
+    var vx=ev.v.x,vy=ev.v.y,n=Math.sqrt(vx*vx+vy*vy);
+    if(n<1e-14)return;
+    vx/=n;vy/=n;
+    /* Clip parametric line (t*vx, t*vy) to the view rectangle */
+    var tmin=-Infinity,tmax=Infinity;
+    if(Math.abs(vx)>1e-12){
+      var tx1=SX_MIN/vx,tx2=SX_MAX/vx;
+      tmin=Math.max(tmin,Math.min(tx1,tx2));tmax=Math.min(tmax,Math.max(tx1,tx2));
+    } else if(0<SX_MIN||0>SX_MAX)return;
+    if(Math.abs(vy)>1e-12){
+      var ty1=SY_MIN/vy,ty2=SY_MAX/vy;
+      tmin=Math.max(tmin,Math.min(ty1,ty2));tmax=Math.min(tmax,Math.max(ty1,ty2));
+    } else if(0<SY_MIN||0>SY_MAX)return;
+    if(tmax<=tmin)return;
+    var x1=tmin*vx,y1=tmin*vy,x2=tmax*vx,y2=tmax*vy;
+    ctx.beginPath();
+    ctx.moveTo(s2cx(x1),s2cy(y1));
+    ctx.lineTo(s2cx(x2),s2cy(y2));
+    ctx.stroke();
+  });
+  ctx.restore();
+}
+
+/* ── Draw phase portrait ── */
+var COLORS=['#1d4ed8','#dc2626','#059669','#9333ea','#ea580c','#0891b2','#be185d','#4b5563'];
+
+function drawPortrait(){
+  var canvas=document.getElementById('phCanvas');
+  var ctx=canvas.getContext('2d');
+  var M=getM(),a=M.a,b=M.b,c=M.c,d=M.d;
+  var arrowCount=parseInt(document.getElementById('arrowCount').value)||30;
+  var arrowScale=parseFloat(document.getElementById('arrowScale').value)||1.2;
+  var opacity=parseFloat(document.getElementById('arrowOpacity').value)||0.30;
+  var fcolor=document.getElementById('fieldColor').value||'#000000';
+  var showGrid=document.getElementById('showGrid').checked;
+  var showInit=document.getElementById('showInitialPoint').checked;
+
+  ctx.fillStyle=isHC()?'#fff':'#ffffff';ctx.fillRect(0,0,CW,CH);
+
+  var xs=xScale(),ys=yScale(),xo=xOff();
+  var dw=CW-2*PAD,dh=CH-2*PAD;
+  var step=Math.min(dw/arrowCount,dh/arrowCount);
+
+  /* Grid — two-level: subtle minor + slightly stronger major */
+  if(showGrid){
+    var ts=niceStep(SX_MAX-SX_MIN),ys2=niceStep(SY_MAX-SY_MIN);
+    ctx.setLineDash([]);
+    /* Minor grid */
+    ctx.strokeStyle=isHC()?'rgba(0,0,0,.06)':'rgba(0,0,0,.04)';ctx.lineWidth=0.5;
+    for(var t=Math.ceil(SX_MIN/(ts/2))*(ts/2);t<=SX_MAX+1e-9;t+=ts/2){var px=s2cx(t);ctx.beginPath();ctx.moveTo(px,xo);ctx.lineTo(px,CH-xo);ctx.stroke();}
+    for(var yv=Math.ceil(SY_MIN/(ys2/2))*(ys2/2);yv<=SY_MAX+1e-9;yv+=ys2/2){var py=s2cy(yv);ctx.beginPath();ctx.moveTo(xo,py);ctx.lineTo(CW-xo,py);ctx.stroke();}
+    /* Major grid */
+    ctx.strokeStyle=isHC()?'rgba(0,0,0,.14)':'rgba(0,0,0,.08)';ctx.lineWidth=0.7;
+    for(var t=Math.ceil(SX_MIN/ts)*ts;t<=SX_MAX+1e-9;t+=ts){var px=s2cx(t);ctx.beginPath();ctx.moveTo(px,xo);ctx.lineTo(px,CH-xo);ctx.stroke();}
+    for(var yv=Math.ceil(SY_MIN/ys2)*ys2;yv<=SY_MAX+1e-9;yv+=ys2){var py=s2cy(yv);ctx.beginPath();ctx.moveTo(xo,py);ctx.lineTo(CW-xo,py);ctx.stroke();}
+  }
+
+  /* Direction field — tapered arrows with magnitude-normalised sizing */
+  var showFieldChk=document.getElementById('showField').checked;
+  ctx.setLineDash([]);
+  var r0=parseInt(fcolor.slice(1,3),16),g0=parseInt(fcolor.slice(3,5),16),b0=parseInt(fcolor.slice(5,7),16);
+  var fieldArrows=[];var maxMag=0;
+  var mnX=xo,mxX=CW-xo,mnY=xo,mxY=CH-xo;
+  if(showFieldChk)
+  for(var px=mnX+step/2;px<mxX;px+=step){
+    for(var py=mnY+step/2;py<mxY;py+=step){
+      var sx=c2sx(px),sy=c2sy(py);
+      var dx=a*sx+b*sy,dy=c*sx+d*sy,mag=Math.sqrt(dx*dx+dy*dy);
+      if(mag===0)continue;
+      if(mag>maxMag)maxMag=mag;
+      fieldArrows.push({px:px,py:py,dx:dx,dy:dy,mag:mag});
+    }
+  }
+  var refMag=maxMag||1;
+  if(showFieldChk)
+  fieldArrows.forEach(function(ar){
+    var nf=Math.min(ar.mag/refMag,1),sf=Math.sqrt(nf);
+    var dl=20*arrowScale*(0.55+0.45*sf);
+    var dcx=ar.dx/ar.mag,dcy=-ar.dy/ar.mag;
+    var headLen=Math.max(dl*0.35,5),headHW=headLen*0.5;
+    var shaftLen=dl-headLen*0.4;
+    var baseW=1.0+0.8*sf,tipW=baseW*0.3;
+    var ppx=-dcy,ppy=dcx;
+    var tx=ar.px-dcx*shaftLen/2,ty=ar.py-dcy*shaftLen/2;
+    var hx=ar.px+dcx*shaftLen/2,hy=ar.py+dcy*shaftLen/2;
+    var alpha=opacity*(0.7+0.3*sf);
+    ctx.fillStyle='rgba('+r0+','+g0+','+b0+','+alpha+')';
+    ctx.beginPath();
+    ctx.moveTo(tx+ppx*baseW,ty+ppy*baseW);
+    ctx.lineTo(hx+ppx*tipW,hy+ppy*tipW);
+    ctx.lineTo(hx+ppx*headHW,hy+ppy*headHW);
+    ctx.lineTo(hx+dcx*headLen,hy+dcy*headLen);
+    ctx.lineTo(hx-ppx*headHW,hy-ppy*headHW);
+    ctx.lineTo(hx-ppx*tipW,hy-ppy*tipW);
+    ctx.lineTo(tx-ppx*baseW,ty-ppy*baseW);
+    ctx.closePath();ctx.fill();
+  });
+
+  /* Axes */
+  ctx.strokeStyle=isHC()?'#000':'#1f2937';ctx.lineWidth=1.5;ctx.lineCap='round';ctx.setLineDash([]);
+  if(SX_MIN<=0&&SX_MAX>=0){var ax=s2cx(0);ctx.beginPath();ctx.moveTo(ax,xo);ctx.lineTo(ax,CH-xo);ctx.stroke();}
+  if(SY_MIN<=0&&SY_MAX>=0){var ay=s2cy(0);ctx.beginPath();ctx.moveTo(xo,ay);ctx.lineTo(CW-xo,ay);ctx.stroke();}
+
+  /* Tick labels */
+  ctx.fillStyle=isHC()?'#000':'#222';ctx.font='bold 13px -apple-system,Arial,sans-serif';
+  var ts2=niceStep(SX_MAX-SX_MIN);
+  ctx.textAlign='center';ctx.textBaseline='top';
+  for(var t=Math.ceil(SX_MIN/ts2)*ts2;t<=SX_MAX+1e-9;t+=ts2){
+    if(Math.abs(t)<ts2*.01)continue;
+    ctx.fillText(+(t.toFixed(2)),s2cx(t),CH-xo+8);
+  }
+  var ys3=niceStep(SY_MAX-SY_MIN);
+  ctx.textAlign='right';ctx.textBaseline='middle';
+  for(var yv=Math.ceil(SY_MIN/ys3)*ys3;yv<=SY_MAX+1e-9;yv+=ys3){
+    if(Math.abs(yv)<ys3*.01)continue;
+    ctx.fillText(+(yv.toFixed(2)),xo-8,s2cy(yv));
+  }
+  ctx.textAlign='center';ctx.textBaseline='top';
+  ctx.fillText('x',CW-xo+18,CH-xo-5);
+  ctx.save();ctx.translate(xo-18,CH/2);ctx.rotate(-Math.PI/2);ctx.textBaseline='middle';ctx.fillText('y',0,0);ctx.restore();
+
+  /* Eigenvector lines — straight lines through origin along real eigen-directions */
+  if(document.getElementById('showEigen').checked){
+    var eColor=document.getElementById('eigenColor').value||'#000000';
+    drawEigenLines(ctx,eColor);
+  }
+
+  /* Trajectories with directional arrowheads */
+  trajectories.forEach(function(traj,idx){
+    if(traj.length<2)return;
+    var color=COLORS[idx%COLORS.length];
+    ctx.save();
+    ctx.strokeStyle=color;ctx.lineWidth=2;
+    ctx.lineJoin='round';ctx.lineCap='round';ctx.setLineDash([]);
+    ctx.globalAlpha=0.85;
+    ctx.beginPath();ctx.moveTo(traj[0].cx,traj[0].cy);
+    for(var i=1;i<traj.length;i++)ctx.lineTo(traj[i].cx,traj[i].cy);
+    ctx.stroke();
+
+    /* Directional arrowheads — adaptive spacing, max 8, min 60px separation */
+    var totalLen=0;
+    for(var i=1;i<traj.length;i++){var ddx=traj[i].cx-traj[i-1].cx,ddy=traj[i].cy-traj[i-1].cy;totalLen+=Math.sqrt(ddx*ddx+ddy*ddy);}
+    var headSzIn=parseFloat(document.getElementById('trajHeadSize').value);
+    var arrowSz=isFinite(headSzIn)&&headSzIn>0?headSzIn:5.5;
+    var maxArr=8,arrowSp=Math.max(100,totalLen/(maxArr+1));
+    ctx.fillStyle=color;ctx.globalAlpha=0.92;
+    var accum=arrowSp*0.45,placed=[];
+    for(var i=1;i<traj.length;i++){
+      var ddx=traj[i].cx-traj[i-1].cx,ddy=traj[i].cy-traj[i-1].cy;
+      var seg=Math.sqrt(ddx*ddx+ddy*ddy);if(seg<0.5)continue;
+      accum+=seg;
+      if(accum>=arrowSp){
+        var ax=traj[i].cx,ay=traj[i].cy;
+        var tooClose=false;
+        for(var k=0;k<placed.length;k++){var ex=ax-placed[k].x,ey=ay-placed[k].y;if(ex*ex+ey*ey<3600){tooClose=true;break;}}
+        if(tooClose)continue;
+        accum=0;placed.push({x:ax,y:ay});
+        var ang=Math.atan2(ddy,ddx);
+        ctx.beginPath();
+        ctx.moveTo(ax+arrowSz*Math.cos(ang),ay+arrowSz*Math.sin(ang));
+        ctx.lineTo(ax-arrowSz*Math.cos(ang-Math.PI/3.2),ay-arrowSz*Math.sin(ang-Math.PI/3.2));
+        ctx.lineTo(ax-arrowSz*Math.cos(ang+Math.PI/3.2),ay-arrowSz*Math.sin(ang+Math.PI/3.2));
+        ctx.closePath();ctx.fill();
+      }
+    }
+    ctx.restore();
+  });
+
+  /* Initial points — colour-filled with white ring + dark outline */
+  if(showInit){
+    userPoints.forEach(function(pt,idx){
+      var color=COLORS[idx%COLORS.length];
+      var ix=s2cx(pt.x),iy=s2cy(pt.y);
+      ctx.globalAlpha=1;
+      ctx.fillStyle=color;
+      ctx.beginPath();ctx.arc(ix,iy,5.5,0,2*Math.PI);ctx.fill();
+      ctx.strokeStyle='#fff';ctx.lineWidth=2.2;
+      ctx.beginPath();ctx.arc(ix,iy,5.5,0,2*Math.PI);ctx.stroke();
+      ctx.strokeStyle='rgba(0,0,0,0.4)';ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(ix,iy,5.5,0,2*Math.PI);ctx.stroke();
+    });
+  }
+
+  updateBadge();updateEq();
+}
+
+/* ── Bifurcation animation ── */
+async function startBifurc(){
+  stopAnim();
+  var pts=[{x:0,y:2},{x:2,y:0},{x:0,y:-2},{x:-2,y:0},{x:1.5,y:1.5},{x:-1.5,y:1.5},{x:1.5,y:-1.5},{x:-1.5,y:-1.5}];
+  userPoints=pts.map(function(p){return{x:p.x,y:p.y};});
+  var mus=[];for(var m=-2;m<=2.001;m+=0.5)mus.push(parseFloat(m.toFixed(2)));
+  var idx=0;animRunning=true;
+  async function frame(){
+    if(!animRunning)return;
+    var mu=mus[idx++];if(idx>=mus.length)idx=0;
+    setComputed(0,1,-mu,4-mu*mu);
+    trajectories=[];
+    for(var i=0;i<userPoints.length;i++)trajectories.push(await computeTraj(userPoints[i].x,userPoints[i].y));
+    drawPortrait();
+    if(animRunning)animTimer=setTimeout(frame,1100);
+  }
+  frame();
+}
+function stopAnim(){animRunning=false;clearTimeout(animTimer);clearComputed();}
+
+/* ── Draw phase portrait ── */
+function drawPortraitAndReset(){
+  stopAnim();userPoints=[];trajectories=[];
+  document.getElementById('clickHint').style.display='block';
+  drawPortrait();clearTimeCanvas();
+}
+
+/* ── Init strategic trajectories for examples ── */
+async function loadStrategicTrajs(){
+  var M=getM(),cl=classifyEquilibrium(M.a,M.b,M.c,M.d);
+  var pts;
+  if(cl.type==='Center'){
+    /* 8 concentric closed orbits at evenly-spaced radii along y-axis */
+    var rMax=Math.min(SX_MAX,SY_MAX)*0.92;
+    pts=[];
+    for(var k=1;k<=8;k++){var r=rMax*k/8;pts.push({x:0,y:r});}
+  } else {
+    pts=[{x:0,y:2},{x:2,y:0},{x:0,y:-2},{x:-2,y:0},{x:1.5,y:1.5},{x:-1.5,y:1.5},{x:1.5,y:-1.5},{x:-1.5,y:-1.5}];
+  }
+  userPoints=pts.map(function(p){return{x:p.x,y:p.y};});
+  trajectories=[];
+  for(var i=0;i<userPoints.length;i++)trajectories.push(await computeTraj(userPoints[i].x,userPoints[i].y));
+  document.getElementById('clickHint').style.display='none';
+  drawPortrait();
+  if(document.getElementById('timePanel').style.display!=='none')autoFitTimePlot();
+}
+
+/* ── Time series ── */
+function clearTimeCanvas(){
+  var tc=document.getElementById('timeCanvas');
+  var ctx=tc.getContext('2d');ctx.fillStyle='#f9fafb';ctx.fillRect(0,0,tc.width,tc.height);
+}
+function updateTimeBtns(){
+  var bx=document.getElementById('btnX'),by=document.getElementById('btnY');
+  bx.className='tvar-btn'+(timeVarX?'':' x-off');bx.setAttribute('aria-pressed',String(timeVarX));
+  by.className='tvar-btn'+(timeVarY?' y-on':' y-off');by.setAttribute('aria-pressed',String(timeVarY));
+}
+function autoFitTimePlot(){
+  if(!trajectories.length)return;
+  var tl=Infinity,th=-Infinity,vl=Infinity,vh=-Infinity;
+  trajectories.forEach(function(traj){traj.forEach(function(p){
+    if(!isFinite(p.t))return;
+    if(p.t<tl)tl=p.t;if(p.t>th)th=p.t;
+    if(timeVarX&&isFinite(p.sx)){if(p.sx<vl)vl=p.sx;if(p.sx>vh)vh=p.sx;}
+    if(timeVarY&&isFinite(p.sy)){if(p.sy<vl)vl=p.sy;if(p.sy>vh)vh=p.sy;}
+  });});
+  if(!isFinite(tl))tl=0;if(!isFinite(th))th=30;
+  if(!isFinite(vl))vl=-3;if(!isFinite(vh))vh=3;
+  vl=Math.max(vl,-5);vh=Math.min(vh,5);
+  var vp=(vh-vl)*0.08||0.5,tp=(th-tl)*0.02||0.5;
+  document.getElementById('tPlotMin').value=(tl-tp).toPrecision(4);
+  document.getElementById('tPlotMax').value=(th+tp).toPrecision(4);
+  document.getElementById('vPlotMin').value=(vl-vp).toPrecision(4);
+  document.getElementById('vPlotMax').value=(vh+vp).toPrecision(4);
+  drawTimePlot();
+}
+function drawTimePlot(){
+  var canvas=document.getElementById('timeCanvas');
+  var ctx=canvas.getContext('2d'),W=canvas.width,H=canvas.height;
+  ctx.fillStyle=isHC()?'#fff':'#f9fafb';ctx.fillRect(0,0,W,H);
+  var tmin=+document.getElementById('tPlotMin').value,tmax=+document.getElementById('tPlotMax').value;
+  var vmin=+document.getElementById('vPlotMin').value,vmax=+document.getElementById('vPlotMax').value;
+  if(tmax<=tmin||vmax<=vmin||(!timeVarX&&!timeVarY)||!trajectories.length)return;
+  /* Grid */
+  ctx.strokeStyle=isHC()?'rgba(0,0,0,.15)':'rgba(200,200,200,.45)';ctx.lineWidth=0.5;
+  var ts=niceStep(tmax-tmin);
+  for(var v=Math.ceil(tmin/ts)*ts;v<=tmax+1e-9;v+=ts){var px=(v-tmin)/(tmax-tmin)*W;ctx.beginPath();ctx.moveTo(px,0);ctx.lineTo(px,H);ctx.stroke();}
+  var vs=niceStep(vmax-vmin);
+  for(var v=Math.ceil(vmin/vs)*vs;v<=vmax+1e-9;v+=vs){var py=(vmax-v)/(vmax-vmin)*H;ctx.beginPath();ctx.moveTo(0,py);ctx.lineTo(W,py);ctx.stroke();}
+  /* Axes */
+  ctx.strokeStyle=isHC()?'#000':'#333';ctx.lineWidth=1.5;
+  if(vmin<=0&&vmax>=0){var y0=(vmax-0)/(vmax-vmin)*H;ctx.beginPath();ctx.moveTo(0,y0);ctx.lineTo(W,y0);ctx.stroke();}
+  if(tmin<=0&&tmax>=0){var x0=(0-tmin)/(tmax-tmin)*W;ctx.beginPath();ctx.moveTo(x0,0);ctx.lineTo(x0,H);ctx.stroke();}
+  /* Curves */
+  trajectories.forEach(function(traj){
+    function drawVar(getv,color){
+      ctx.strokeStyle=color;ctx.lineWidth=2;ctx.lineJoin='round';ctx.lineCap='round';
+      ctx.beginPath();var started=false;
+      traj.forEach(function(p){
+        if(!isFinite(p.t))return;
+        var v=getv(p);if(!isFinite(v))return;
+        var px2=(p.t-tmin)/(tmax-tmin)*W,py2=(vmax-v)/(vmax-vmin)*H;
+        started?ctx.lineTo(px2,py2):ctx.moveTo(px2,py2);started=true;
+      });
+      ctx.stroke();
+    }
+    if(timeVarX)drawVar(function(p){return p.sx;},'#dc2626');
+    if(timeVarY)drawVar(function(p){return p.sy;},'#16a34a');
+  });
+  /* Legend */
+  ctx.font='bold 12px -apple-system,Arial,sans-serif';
+  var ly=14;
+  if(timeVarX){ctx.fillStyle='#dc2626';ctx.fillText('x(t)',W-48,ly);ly+=16;}
+  if(timeVarY){ctx.fillStyle='#16a34a';ctx.fillText('y(t)',W-48,ly);}
+}
+
+/* ── Download ── */
+function downloadPNG(){
+  var canvas=document.getElementById('phCanvas');
+  var link=document.createElement('a');link.download='phase-portrait.png';
+  link.href=canvas.toDataURL('image/png');link.click();
+}
+
+/* ── Event listeners ── */
+document.addEventListener('DOMContentLoaded',function(){
+
+  /* Canvas click */
+  var canvas=document.getElementById('phCanvas');
+  canvas.addEventListener('click',function(e){
+    stopAnim();
+    var rect=canvas.getBoundingClientRect();
+    var scX=CW/rect.width,scY=CH/rect.height;
+    var cx=(e.clientX-rect.left)*scX,cy=(e.clientY-rect.top)*scY;
+    if(!inCanvas(cx,cy))return;
+    var sp={x:c2sx(cx),y:c2sy(cy)};
+    userPoints.push(sp);
+    computeTraj(sp.x,sp.y).then(function(pts){
+      trajectories.push(pts);drawPortrait();
+      document.getElementById('clickHint').style.display='none';
+      if(document.getElementById('timePanel').style.display!=='none')autoFitTimePlot();
+      say('Trajectory added at ('+sp.x.toFixed(3)+', '+sp.y.toFixed(3)+')');
+    });
+  });
+
+  /* Matrix debounced redraw */
+  var dDraw=debounce(function(){clearComputed();drawPortraitAndReset();},300);
+  ['a','b','c','d'].forEach(function(id){
+    document.getElementById(id).addEventListener('input',function(){clearComputed();dDraw();});
+  });
+
+  /* Settings throttled */
+  var thDraw=throttle(drawPortrait,80);
+  ['arrowCount','arrowScale','arrowOpacity','trajHeadSize'].forEach(function(id){document.getElementById(id).addEventListener('input',thDraw);});
+  document.getElementById('fieldColor').addEventListener('change',drawPortrait);
+  document.getElementById('showField').addEventListener('change',drawPortrait);
+  document.getElementById('showGrid').addEventListener('change',drawPortrait);
+  document.getElementById('showInitialPoint').addEventListener('change',drawPortrait);
+  document.getElementById('showEigen').addEventListener('change',drawPortrait);
+  document.getElementById('eigenColor').addEventListener('change',drawPortrait);
+
+  /* Examples dropdown */
+  document.getElementById('exampleSel').addEventListener('change',function(){
+    var v=this.value;if(!v)return;
+    if(v==='bifurc'){this.value='';say('Bifurcation animation started.');startBifurc();return;}
+    stopAnim();
+    var parts=v.split(',');
+    ['a','b','c','d'].forEach(function(id,i){document.getElementById(id).value=parts[i];clearComputed();});
+    loadStrategicTrajs().then(function(){say('Example loaded.');});
+    this.value='';
+  });
+
+  /* Buttons */
+  document.getElementById('btnGenerate').addEventListener('click',function(){drawPortraitAndReset();say('Phase portrait generated.');});
+  document.getElementById('btnClear').addEventListener('click',function(){
+    stopAnim();userPoints=[];trajectories=[];
+    document.getElementById('clickHint').style.display='block';
+    drawPortrait();clearTimeCanvas();say('Trajectories cleared.');
+  });
+  document.getElementById('btnDL').addEventListener('click',downloadPNG);
+  document.getElementById('btnTime').addEventListener('click',function(){
+    var panel=document.getElementById('timePanel');
+    var open=panel.style.display!=='none';
+    panel.style.display=open?'none':'block';
+    this.setAttribute('aria-expanded',String(!open));
+    this.textContent=open?'Time series':'Hide time series';
+    if(!open&&trajectories.length)autoFitTimePlot();
+  });
+
+  /* Time series controls */
+  document.getElementById('btnX').addEventListener('click',function(){timeVarX=!timeVarX;updateTimeBtns();drawTimePlot();});
+  document.getElementById('btnY').addEventListener('click',function(){timeVarY=!timeVarY;updateTimeBtns();drawTimePlot();});
+  document.getElementById('btnAutoFit').addEventListener('click',autoFitTimePlot);
+  var dTime=debounce(drawTimePlot,150);
+  ['tPlotMin','tPlotMax','vPlotMin','vPlotMax'].forEach(function(id){document.getElementById(id).addEventListener('input',dTime);});
+
+  /* Info panel */
+  document.getElementById('infoBtn').addEventListener('click',function(){
+    var exp=this.getAttribute('aria-expanded')==='true';
+    this.setAttribute('aria-expanded',String(!exp));
+    document.getElementById('infoBody').hidden=exp;
+    document.getElementById('infoIcon').textContent=exp?'+':'\u2212';
+    if(!exp&&window.MathJax&&MathJax.typesetPromise)MathJax.typesetPromise([document.getElementById('infoBody')]).catch(function(){});
+  });
+
+  /* High contrast */
+  document.getElementById('ctog').addEventListener('click',function(){
+    document.documentElement.classList.toggle('hc');
+    drawPortrait();
+    say('High contrast '+(isHC()?'on':'off'));
+  });
+
+  /* Initial draw */
+  drawPortrait();
+});
+</script>
+</body>
+</html>
