@@ -1,0 +1,20 @@
+div.container {
+    width: min(80vw, 8in);
+    margin: 0 auto;
+}
+body {
+    margin: 0 0 0 0;
+    font-family: sans-serif;
+}
+@media print {
+    write-box > div > * {
+        display: none;
+    }
+    div.container {
+        width: 6in;
+        margin: 0 auto;
+    }
+    /*write-box > div {
+        border: 1px solid black;
+    }*/
+}
