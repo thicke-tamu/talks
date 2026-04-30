@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Sample notes</title>
+    <title>${title}</title>
     <link href="style_onepane.css" rel="stylesheet" />
     <script>
       window.EXCALIDRAW_ASSET_PATH =
@@ -30,87 +30,116 @@
             tex: {packages: {'[+]': ['units']}}
         };
     </script>
-    <script>
-        function checkPassword(password) {
-            const { ciphertext, hmac } = encryptedPage;
-            const newHmac = CryptoJS.HmacSHA256(ciphertext, password).toString();
-            if (newHmac == hmac) { // if password is correct
-                localStorage.setItem('password', password);
-                // Display "Loading..."
-                document.querySelector('#encryptionForm').style.display = 'none';
-                document.querySelector('#encryptionLoading').style.display = 'inline';
-                // Decrypt and update page.
-                // Use setTimeout so that the above CSS styles update first.
-                setTimeout(() => {
-                    plainText = CryptoJS.AES.decrypt(ciphertext, password).toString(CryptoJS.enc.Utf8);
-                    document.body.innerHTML = plainText;
-                }, 0);
-            }
-            else {
-                localStorage.removeItem('password');
-                document.querySelector('#password').classList.add('incorrect');
-            }
-            console.log('localStorage', localStorage.getItem('password'))
-        }
-
-        window.addEventListener('load', (e) => {
-            if (localStorage.getItem('password')) {
-                checkPassword(localStorage.getItem('password'));
-            }
-            document.querySelector('form').addEventListener('submit', (e) => {
-                e.preventDefault();
-                checkPassword(document.querySelector('#password').value);
-            });
-            document.querySelector('#password').addEventListener('input', (e) => {
-                document.querySelector('#password').classList.remove('incorrect');
-            });
-        });
-
-        const encryptedPage = JSON.parse(`{"ciphertext":"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","hmac":"e600b8eb8866a3335083066836643822877aec42b687ac581e067a6763ab1b2b"}`);
-    </script>
-    <style>
-        div#passwordContainer {
-            --password-font-size: 1.2rem;
-            margin: 0.5in auto;
-            padding: 0.3in 0in;
-            width: 25rem;
-            background-color: #DDDDDD;
-            border-radius: 0.2in;
-            font-family: sans-serif;
-            text-align: center;
-        }
-        div#passwordContainer p {
-            margin: 0;
-        }
-        div#passwordContainer label {
-            font-size: var(--password-font-size);
-        }
-        div#passwordContainer input {
-            font-size: var(--password-font-size);
-        }
-        div#passwordContainer input.incorrect {
-            border-color: red;
-        }
-        div#passwordContainer button {
-            font-size: var(--password-font-size);
-        }
-        #encryptionLoading {
-            font-size: var(--password-font-size);
-        }
-    </style>
-
 </head>
 <body>
-    <div id="passwordContainer">
-        <p style="font-size: 1.5rem; margin-bottom: 0.3in;">Enter password to open notes.</p>
-        <p>
-            <form id="encryptionForm">
-                <label for="password">Password:</label>
-                <input type="text" id="password" size="15" />
-                <button type="submit">Submit</button>
-            </form>
-            <span id="encryptionLoading" style="display: none;">Loading...</span>
-        </p>
-    </div>
+    <tool-bar position="left"></tool-bar>
+    <div class="container"><p style="display: none"><inline-math latex="
+\newcommand{\dd}{\mathop{}\!\mathrm{d}}
+\newcommand{\CC}{\mathbb{C}}
+\newcommand{\EE}{\mathbb{E}}
+\newcommand{\NN}{\mathbb{N}}
+\newcommand{\PP}{\mathbb{P}}
+\newcommand{\RR}{\mathbb{R}}
+\newcommand{\ZZ}{\mathbb{Z}}
+\DeclareMathOperator{\tr}{tr}
+\newcommand{\vecn}[2]{\mathbf{#1}^{(#2)}}"></inline-math></p>
+<div style="height:45vh"></div><h1>ChewyMarkdown</h1><p><em>A framework for interactive accessible notes</em></p><p>Kyle Thicke<br />thicke@tamu.edu</p><div style="height:50vh"></div><h2>Target classes</h2><unordered-list>
+    <li>Problem solving</li>
+    <li>Math, physics, engineering</li>
+</unordered-list><div style="height:50vh"></div><h2>The status quo</h2><unordered-list>
+    <li>Bare writing (chalk board / Wacom)</li>
+    <img src="https://thicke-tamu.github.io/talks/files_ttlc2026/chalkboard.png" alt="Math on a chalkboard" style="width: 6in;" />
+    <li style="margin-top: 0.2in">Skeleton notes</li>
+    <img src="https://thicke-tamu.github.io/talks/files_ttlc2026/skeleton_notes.png" alt="Example of skeleton notes" style="width: 6in;" />
+    <div style="height:1in"></div>
+    <img src="https://thicke-tamu.github.io/talks/files_ttlc2026/clay_tablet.png" alt="Math on a clay tablet" style="width: 6in;" />
+    <div style="height:1in"></div>
+    <li>videos or interactive tools in a separate window</li>
+</unordered-list><div style="height:50vh"></div><h2>The dream</h2><unordered-list>
+    <li>interactive during class</li>
+    <iframe scrolling="no" title="14.6" src="https://www.geogebra.org/material/iframe/id/mksn3baf/width/1000/height/600/border/888888/sfsb/true/smb/false/stb/false/stbh/false/ai/false/asb/false/sri/false/rc/false/ld/false/sdz/false/ctl/false" width="550px" height="350px" style="border:0px;"> </iframe>
+    <li>interactive when reviewing notes / studying</li>
+    <li>everything in one place</li>
+</unordered-list><div style="height:50vh"></div><h2>Using today's technology to the fullest</h2><unordered-list>
+    <li style="margin-bottom: 0.1in">All of web technologies are now possible to use in class</li>
+    <iframe width="560" height="315" src="https://www.youtube-nocookie.com/embed/yM2rT3teakE?si=FKtBmzjHdl8sWjEU" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
+    <div style="height:0.2in"></div>
+    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3433.84652508539!2d-96.34267902413735!3d30.61009187464359!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x86468399317cbedf%3A0xe6179891c9a277b1!2sKyle%20Field!5e0!3m2!1snl!2snl!4v1777261230975!5m2!1snl!2snl" width="600" height="450" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <div style="height:0.2in"></div>
+    <li>Using AI to write one-off interactive resources<br>
+    <iframe width="768" height="1650" src="https://thicke-tamu.github.io/talks/files_ttlc2026/shelvean.html" frameborder="0"></iframe></li>
+    <li>Using AI to transcribe handwritten notes</li>
+</unordered-list><div style="height:50vh"></div><h2>Design goals</h2><ordered-list>
+    <li>Easy to start</li>
+    <unordered-list>
+        <li>Nothing to install!</li>
+        <li>Markdown</li>
+        <unordered-list>
+            <li>Headers: #, ##, ###, ...</li>
+            <li>*<em>italics</em>*, **<strong>bold</strong>**</li>
+            <li><code> `code` </code></li>
+            <li>If you want to output `, *, or #, use a backslash in front of it.</li>
+            <li>Line break = line break</li>
+            <li>Blank line in between = new paragraph</li>
+        </unordered-list>
+        <li>Latex (for math)</li>
+        <unordered-list>
+            <li><code>$x^2$</code></li>
+            <li><code>\(x^2\)</code></li>
+            <li><code>$$x^2$$</code></li>
+            <li><code>\[x^2\]</code></li>
+            <li><code>\begin{equation} x^2 \end{equation}</code></li>
+            <li><code>\begin{align} x^2 \end{align}</code></li>
+            <li>etc.</li>
+        </unordered-list>
+        <li>HTML</li>
+        <unordered-list>
+            <li>If you want to be fancy :)</li>
+        </unordered-list>
+    </unordered-list>
+    <li>Extensible</li>
+        <unordered-list>
+            <li>People can write custom HTML elements that act like "packages" that others can use</li>
+        </unordered-list>
+    <li>Accessible by default</li>
+        <unordered-list>
+            <li>Unless you write your own HTML, no remediation should be required</li>
+        </unordered-list>
+</ordered-list><div style="height:50vh"></div><h2>Example</h2>
+<code-editor id='example-code'></code-editor><p><script>
+    const myCode = '### Existence and uniqueness of solutionsnnJust because we can write down an initial value problem, doesn&#38;t necessarily mean that there is a solution.  And if there is a solution, it doesn&#38;t necessarily mean that there is only one solution.nnFrom a practical point of view:  If your initial value problem does not have exactly one solution, you probably did the modeling incorrectly.n&lt;unordered-list&gt;n    &lt;li&gt;If there is no solution, then what exactly are you looking for?&lt;/li&gt;n    &lt;li&gt;Mathematical models are usually used to predict the future (e.g., where will the ball land?), so if there is more than one solution, that is usually a bad sign.&lt;/li&gt;n&lt;/unordered-list&gt;nn&lt;fun-definition title="Existence"&gt;n    We say a solution &#42;&#42;exists&#42;&#42; if n    &lt;write-box height="0.5in"&gt;&lt;/write-box&gt;n&lt;/fun-definition&gt;nn&lt;fun-definition title="Uniqueness"&gt;n    We say a solution is &#42;&#42;unique&#42;&#42; ifn    &lt;write-box height="0.5in"&gt;&lt;/write-box&gt;n&lt;/fun-definition&gt;nn&lt;fun-example&gt;n    &#42;&#42;(IVP with no solutions)&#42;&#42;&lt;br&gt;n    Show that the following IVP does not have a solution.&lt;br&gt;n    &#92;begin{equation&#42;}n        &#92;frac{&#92;dd y}{&#92;dd t} = 2t, &#92;qquad y(0) = 1, &#92;qquad y&#38;(0) = 7.n    &#92;end{equation&#42;}n    &lt;write-box height="3in"&gt;&lt;/write-box&gt;n&lt;/fun-example&gt;nn&lt;fun-theorem title="Existence and uniqueness for first-order linear ODEs"&gt;n    If the functions &#36;p&#36; and &#36;g&#36; are continuous on an open interval &#36;I = (&#92;alpha, &#92;beta)&#36; containing the point &#36;t = t_0&#36;, then for any given &#36;y_0&#36;, there exists a unique function that satisfies the initial value problemn    &#92;begin{equation&#42;}n        y&#38; + p(t) y = g(t), &#92;qquad y(t_0) = y_0n    &#92;end{equation&#42;}n    on the interval &#36;I&#36;.n&lt;/fun-theorem&gt;nn&lt;fun-example title="Examples"&gt;n    Without solving the IVP, determine an interval in which the solution exists.n    &lt;ordered-list format="(a)"&gt;n        &lt;li&gt;&#36;y&#38; + y &#92;tan t = &#92;sin t, &#92;qquad y(&#92;pi) = 0&#36;&lt;/li&gt;n        &lt;write-box height="3in"&gt;&lt;/write-box&gt;n        &lt;li&gt;&#36;&#92;ln(x) f&#38;(x) + f(x) = &#92;cot x, &#92;qquad y(2) = 5&#36;&lt;/li&gt;n        &lt;write-box height="3in"&gt;&lt;/write-box&gt;n    &lt;/ordered-list&gt;n&lt;/fun-example&gt;';
+    window.addEventListener('load', () => {
+        document.querySelector('#example-code').dispatchEvent(new CustomEvent('replaceText', { detail: myCode }));
+    });
+</script></p><h3>Existence and uniqueness of solutions</h3><p>Just because we can write down an initial value problem, doesn't necessarily mean that there is a solution.  And if there is a solution, it doesn't necessarily mean that there is only one solution.</p><p>From a practical point of view:  If your initial value problem does not have exactly one solution, you probably did the modeling incorrectly.</p><unordered-list>
+    <li>If there is no solution, then what exactly are you looking for?</li>
+    <li>Mathematical models are usually used to predict the future (e.g., where will the ball land?), so if there is more than one solution, that is usually a bad sign.</li>
+</unordered-list><fun-definition title="Existence">
+    We say a solution <strong>exists</strong> if 
+    <write-box height="0.5in"></write-box>
+</fun-definition><fun-definition title="Uniqueness">
+    We say a solution is <strong>unique</strong> if
+    <write-box height="0.5in"></write-box>
+</fun-definition><fun-example>
+    <strong>(IVP with no solutions)</strong><br>
+    Show that the following IVP does not have a solution.<br><math-block latex="
+        \frac{\dd y}{\dd t} = 2t, \qquad y(0) = 1, \qquad y'(0) = 7.
+    " environment="equation*"></math-block>
+    <write-box height="3in"></write-box>
+</fun-example><fun-theorem title="Existence and uniqueness for first-order linear ODEs">
+    If the functions <inline-math latex="p"></inline-math> and <inline-math latex="g"></inline-math> are continuous on an open interval <inline-math latex="I = (\alpha, \beta)"></inline-math> containing the point <inline-math latex="t = t_0"></inline-math>, then for any given <inline-math latex="y_0"></inline-math>, there exists a unique function that satisfies the initial value problem
+    <math-block latex="
+        y' + p(t) y = g(t), \qquad y(t_0) = y_0
+    " environment="equation*"></math-block>
+    on the interval <inline-math latex="I"></inline-math>.
+</fun-theorem><fun-example title="Examples">
+    Without solving the IVP, determine an interval in which the solution exists.
+    <ordered-list format="(a)">
+        <li><inline-math latex="y' + y \tan t = \sin t, \qquad y(\pi) = 0"></inline-math></li>
+        <write-box height="3in"></write-box>
+        <li><inline-math latex="\ln(x) f'(x) + f(x) = \cot x, \qquad y(2) = 5"></inline-math></li>
+        <write-box height="3in"></write-box>
+    </ordered-list>
+</fun-example><div style="height:50vh"></div><h2>Get started!</h2><p>(Warning: Still very much a work in progress :)</p><p><a href="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html">ChewyMarkdown editor</a></p><p><img src="ttps://thicke-tamu.github.io/talks/files_ttlc2026/qr_code.png" alt="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html" style="width: 3in" /></p><p><img src="https://thicke-tamu.github.io/talks/files_ttlc2026/chewy.jpg" alt="Math on a chalkboard" style="width: 6in;" /></p></div>
 </body>
 </html>
