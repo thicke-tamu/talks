@@ -108,7 +108,52 @@
         </unordered-list>
 </ordered-list><div style="height:50vh"></div><h2>Example</h2>
 <code-editor id='example-code'></code-editor><p><script>
-    const myCode = '### Existence and uniqueness of solutionsnnJust because we can write down an initial value problem, doesn&#38;t necessarily mean that there is a solution.  And if there is a solution, it doesn&#38;t necessarily mean that there is only one solution.nnFrom a practical point of view:  If your initial value problem does not have exactly one solution, you probably did the modeling incorrectly.n&lt;unordered-list&gt;n    &lt;li&gt;If there is no solution, then what exactly are you looking for?&lt;/li&gt;n    &lt;li&gt;Mathematical models are usually used to predict the future (e.g., where will the ball land?), so if there is more than one solution, that is usually a bad sign.&lt;/li&gt;n&lt;/unordered-list&gt;nn&lt;fun-definition title="Existence"&gt;n    We say a solution &#42;&#42;exists&#42;&#42; if n    &lt;write-box height="0.5in"&gt;&lt;/write-box&gt;n&lt;/fun-definition&gt;nn&lt;fun-definition title="Uniqueness"&gt;n    We say a solution is &#42;&#42;unique&#42;&#42; ifn    &lt;write-box height="0.5in"&gt;&lt;/write-box&gt;n&lt;/fun-definition&gt;nn&lt;fun-example&gt;n    &#42;&#42;(IVP with no solutions)&#42;&#42;&lt;br&gt;n    Show that the following IVP does not have a solution.&lt;br&gt;n    &#92;begin{equation&#42;}n        &#92;frac{&#92;dd y}{&#92;dd t} = 2t, &#92;qquad y(0) = 1, &#92;qquad y&#38;(0) = 7.n    &#92;end{equation&#42;}n    &lt;write-box height="3in"&gt;&lt;/write-box&gt;n&lt;/fun-example&gt;nn&lt;fun-theorem title="Existence and uniqueness for first-order linear ODEs"&gt;n    If the functions &#36;p&#36; and &#36;g&#36; are continuous on an open interval &#36;I = (&#92;alpha, &#92;beta)&#36; containing the point &#36;t = t_0&#36;, then for any given &#36;y_0&#36;, there exists a unique function that satisfies the initial value problemn    &#92;begin{equation&#42;}n        y&#38; + p(t) y = g(t), &#92;qquad y(t_0) = y_0n    &#92;end{equation&#42;}n    on the interval &#36;I&#36;.n&lt;/fun-theorem&gt;nn&lt;fun-example title="Examples"&gt;n    Without solving the IVP, determine an interval in which the solution exists.n    &lt;ordered-list format="(a)"&gt;n        &lt;li&gt;&#36;y&#38; + y &#92;tan t = &#92;sin t, &#92;qquad y(&#92;pi) = 0&#36;&lt;/li&gt;n        &lt;write-box height="3in"&gt;&lt;/write-box&gt;n        &lt;li&gt;&#36;&#92;ln(x) f&#38;(x) + f(x) = &#92;cot x, &#92;qquad y(2) = 5&#36;&lt;/li&gt;n        &lt;write-box height="3in"&gt;&lt;/write-box&gt;n    &lt;/ordered-list&gt;n&lt;/fun-example&gt;';
+    const myCode = `### Existence and uniqueness of solutions
+
+Just because we can write down an initial value problem, doesn't necessarily mean that there is a solution.  And if there is a solution, it doesn't necessarily mean that there is only one solution.
+
+From a practical point of view:  If your initial value problem does not have exactly one solution, you probably did the modeling incorrectly.
+<unordered-list>
+    <li>If there is no solution, then what exactly are you looking for?</li>
+    <li>Mathematical models are usually used to predict the future (e.g., where will the ball land?), so if there is more than one solution, that is usually a bad sign.</li>
+</unordered-list>
+
+<fun-definition title="Existence">
+    We say a solution **exists** if 
+    <write-box height="0.5in"></write-box>
+</fun-definition>
+
+<fun-definition title="Uniqueness">
+    We say a solution is **unique** if
+    <write-box height="0.5in"></write-box>
+</fun-definition>
+
+<fun-example>
+    **(IVP with no solutions)**<br>
+    Show that the following IVP does not have a solution.<br>
+    \begin{equation*}
+        \frac{\mathrm{d}y}{\mathrm{d}t} = 2t, \qquad y(0) = 1, \qquad y'(0) = 7.
+    \end{equation*}
+    <write-box height="3in"></write-box>
+</fun-example>
+
+<fun-theorem title="Existence and uniqueness for first-order linear ODEs">
+    If the functions $p$ and $g$ are continuous on an open interval $I = (\alpha, \beta)$ containing the point $t = t_0$, then for any given $y_0$, there exists a unique function that satisfies the initial value problem
+    \begin{equation*}
+        y' + p(t) y = g(t), \qquad y(t_0) = y_0
+    \end{equation*}
+    on the interval $I$.
+</fun-theorem>
+
+<fun-example>
+    Without solving the IVP, determine an interval in which the solution exists.
+    <ordered-list>
+        <li>$y' + y \tan t = \sin t, \qquad y(\pi) = 0$</li>
+        <write-box height="3in"></write-box>
+        <li>$\ln(x) f'(x) + f(x) = \cot x, \qquad y(2) = 5$</li>
+        <write-box height="3in"></write-box>
+    </ordered-list>
+</fun-example>`;
     window.addEventListener('load', () => {
         document.querySelector('#example-code').dispatchEvent(new CustomEvent('replaceText', { detail: myCode }));
     });
@@ -141,6 +186,6 @@
         <li><inline-math latex="\ln(x) f'(x) + f(x) = \cot x, \qquad y(2) = 5"></inline-math></li>
         <write-box height="3in"></write-box>
     </ordered-list>
-</fun-example><div style="height:50vh"></div><h2>Get started!</h2><p>(Warning: Still very much a work in progress :)</p><p><a href="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html">ChewyMarkdown editor</a></p><p><img src="ttps://thicke-tamu.github.io/talks/files_ttlc2026/qr_code.png" alt="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html" style="width: 3in" /></p><p><img src="https://thicke-tamu.github.io/talks/files_ttlc2026/chewy.jpg" alt="Math on a chalkboard" style="width: 6in;" /></p></div>
+</fun-example><div style="height:50vh"></div><h2>Get started!</h2><p>(Warning: Still very much a work in progress :)</p><p><a href="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html">ChewyMarkdown editor</a></p><p><img src="https://thicke-tamu.github.io/talks/files_ttlc2026/qr_code.png" alt="https://chewymarkdown.github.io/ChewyMarkdown/src/editor.html" style="width: 3in" /></p><p><img src="https://thicke-tamu.github.io/talks/files_ttlc2026/chewy.jpg" alt="Math on a chalkboard" style="width: 6in;" /></p></div>
 </body>
 </html>
